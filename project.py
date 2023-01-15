@@ -11,9 +11,10 @@ from sklearn.base import clone
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 from math import pi
+from scipy.stats import ttest_ind
 
 
-datasets = ['yeast-2_vs_4', 'ecoli4', 'glass2', 'ecoli-0-1-3-7_vs_2-6']
+datasets = ['pima', 'ecoli1', 'segment0', 'yeast-2_vs_4', 'glass2', 'cleveland-0_vs_4', 'glass4', 'ecoli4', 'glass-0-1-6_vs_5', 'glass5']
 for data_id, dataset in enumerate(datasets):
     dataset = np.genfromtxt("datasets/%s.csv" % (dataset), delimiter=",")
     X = dataset[:, :-1]
@@ -26,7 +27,7 @@ preprocs = {
     'cnn': CondensedNearestNeighbour(random_state=1410),
 }
 metrics = {
-    "recall": recall,
+    'recall': recall,
     'precision': precision,
     'specificity': specificity,
     'f1': f1_score,
@@ -62,11 +63,12 @@ for fold_id, (train, test) in enumerate(rskf.split(X, y)):
 np.save('results', scores)
 
 scores = np.load("results.npy")
+print("Folds:\n", scores)
 scores = np.mean(scores, axis=1).T
 
 # metryki i metody
-metrics=["Recall", 'Precision', 'Specificity', 'F1', 'G-mean', 'BAC']
-methods=["None", 'RUS', 'CNN']
+metrics=['Recall', 'Precision', 'Specificity', 'F1', 'G-mean', 'BAC']
+methods=['None', 'RUS', 'CNN']
 N = scores.shape[0]
 
 # kat dla kazdej z osi
@@ -101,3 +103,12 @@ for method_id, method in enumerate(methods):
 plt.legend(bbox_to_anchor=(1.15, -0.05), ncol=5)
 # Zapisujemy wykres
 plt.savefig("radar", dpi=200)
+
+# alfa = .05
+# t_statistic = np.zeros((len(methods), len(methods)))
+# p_value = np.zeros((len(methods), len(methods)))
+
+# for i in range(len(methods)):
+#     for j in range(len(methods)):
+#         t_statistic[i, j], p_value[i, j] = ttest_ind(scores[i], scores[j])
+# print("t-statistic:\n", t_statistic, "\n\np-value:\n", p_value)
